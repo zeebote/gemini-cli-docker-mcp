@@ -136,6 +136,7 @@ exec docker run \
     --security-opt=no-new-privileges \
     --pids-limit=256 \
     --user=0:0 \
+    --hostname=gemini-cli-docker-mcp \
     --volume="${workspace}:/home/gemini/workspace" \
     --volume="${gemini_directory}:/home/gemini/.gemini" \
     --volume="${profile_file}:/run/gemini-mcp/profile.yaml:ro" \
