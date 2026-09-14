@@ -26,6 +26,7 @@ permissions:
 
 env:
   IMAGE_NAME: zeebote/gemini-cli-docker-mcp
+  UPSTREAM_GATEWAY_EXCEPTION_EXPIRES: 2026-10-14
 
 jobs:
   validate:
@@ -54,6 +55,15 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: 1
+
+      - name: Enforce upstream gateway exception expiry
+        shell: bash
+        run: |
+          if [[ "$(date -u +%F)" > "${UPSTREAM_GATEWAY_EXCEPTION_EXPIRES}" ]] ||
+             [[ "$(date -u +%F)" == "${UPSTREAM_GATEWAY_EXCEPTION_EXPIRES}" ]]; then
+            echo "The docker-mcp vulnerability exception has expired." >&2
+            exit 1
+          fi
 
   build-and-scan:
     name: Build and scan ${{ matrix.platform }}
@@ -87,15 +97,30 @@ jobs:
           platforms: ${{ matrix.platform }}
           load: true
           push: false
-          tags: local/gemini-cli-docker-mcp:scan-${{ matrix.architecture }}
+          tags: zeebote/gemini-cli-docker-mcp:scan-${{ matrix.architecture }}
           cache-from: type=gha,scope=scan-${{ matrix.architecture }}
           cache-to: type=gha,mode=max,scope=scan-${{ matrix.architecture }}
 
-      - name: Scan image vulnerabilities
+      - name: Gate application and OS vulnerabilities
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
           scan-type: image
-          image-ref: local/gemini-cli-docker-mcp:scan-${{ matrix.architecture }}
+          image-ref: zeebote/gemini-cli-docker-mcp:scan-${{ matrix.architecture }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          skip-files: usr/local/bin/docker-mcp
+          exit-code: 1
+
+      # Docker's current v2 gateway image contains vulnerable Go dependencies.
+      # Keep these findings visible while the scoped exception is active.
+      - name: Report upstream docker-mcp vulnerabilities
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          scan-type: image
+          image-ref: zeebote/gemini-cli-docker-mcp:scan-${{ matrix.architecture }}
+          scanners: vuln
+          vuln-type: library
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: 1

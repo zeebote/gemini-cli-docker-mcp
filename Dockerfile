@@ -21,7 +21,8 @@ FROM alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec4
 LABEL org.opencontainers.image.title="Gemini CLI with Docker MCP"
 LABEL org.opencontainers.image.description="Hardened Gemini CLI with a runtime-configured Docker MCP Gateway"
 
-RUN apk add --no-cache \
+RUN apk upgrade --no-cache \
+    && apk add --no-cache \
         bash \
         ca-certificates \
         docker-cli \
