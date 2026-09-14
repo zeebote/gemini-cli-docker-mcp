@@ -1,0 +1,7 @@
+.DS_Store
+.env
+.env.*
+.gemini/
+*.log
+profile.env
+profile.yaml

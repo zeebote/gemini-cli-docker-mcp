@@ -1,0 +1,9 @@
+**
+!Dockerfile
+!bin/
+!bin/docker-entrypoint.sh
+!bin/docker-mcp-gateway.sh
+!bin/prepare-mcp-runtime.py
+!etc/
+!etc/gemini-cli/
+!etc/gemini-cli/settings.json

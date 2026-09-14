@@ -1,0 +1,24 @@
+{
+  "mcp": {
+    "allowed": [
+      "MCP_DOCKER"
+    ]
+  },
+  "mcpServers": {
+    "MCP_DOCKER": {
+      "command": "/usr/local/bin/docker-mcp-gateway.sh",
+      "timeout": 30000
+    }
+  },
+  "security": {
+    "blockGitExtensions": true,
+    "disableAlwaysAllow": true,
+    "disableYoloMode": true,
+    "folderTrust": {
+      "enabled": true
+    }
+  },
+  "telemetry": {
+    "logPrompts": false
+  }
+}
