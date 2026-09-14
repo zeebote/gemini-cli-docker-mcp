@@ -5,9 +5,20 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch or Git ref to build
+        required: true
+        default: main
+        type: string
+      publish_latest:
+        description: Publish the latest tag
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
-  group: docker-publish-${{ github.ref }}
+  group: docker-publish-${{ inputs.branch || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -24,12 +35,15 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.branch || github.ref }}
 
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
         with:
           dockerfile: Dockerfile
           failure-threshold: error
+          ignore: DL3018
 
       - name: Scan source, configuration, and secrets
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
@@ -57,6 +71,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.branch || github.ref }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
@@ -92,6 +108,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.branch || github.ref }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
@@ -105,14 +123,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Read source revision
+        id: source
+        shell: bash
+        run: echo "sha=$(git rev-parse --short=12 HEAD)" >> "${GITHUB_OUTPUT}"
+
       - name: Generate image metadata
         id: metadata
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest
-            type=sha,prefix=main-
+            type=raw,value=latest,enable=${{ github.event_name == 'push' || inputs.publish_latest }}
+            type=raw,value=sha-${{ steps.source.outputs.sha }}
 
       - name: Build and push image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6

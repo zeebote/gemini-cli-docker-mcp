@@ -73,6 +73,8 @@ ENV DEBUG=false \
     SHELL=/bin/bash \
     XDG_CACHE_HOME=/tmp/gemini-cache
 
+USER gemini:gemini
+
 WORKDIR /home/gemini/workspace
 
 ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
