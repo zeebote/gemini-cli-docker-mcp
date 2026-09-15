@@ -11,7 +11,7 @@ Think of it as a portable "sandbox" for a smart AI assistant that can:
 
 ---
 
-## 🧩 Core Concepts (Plain English)
+## 🧩 Core Concepts
 
 Before getting started, here are three simple concepts to understand:
 
@@ -68,7 +68,7 @@ This script automatically pulls the latest official Docker image (`zeebote/gemin
 
 ---
 
-## 💬 How to Talk to Your AI Assistant
+## 💬 How to Talk to gemini-cli
 
 Once you run `./run.sh`, you'll see a terminal prompt where you can chat with the AI. Here are some real-world things you can ask it:
 

@@ -25,8 +25,8 @@ permissions:
   contents: read
 
 env:
-  IMAGE_NAME: zeebote/gemini-cli-docker-mcp
-  UPSTREAM_GATEWAY_EXCEPTION_EXPIRES: 2026-10-14
+  IMAGE_NAME: ${{ vars.DOCKERHUB_REPOSITORY }}
+  UPSTREAM_GATEWAY_EXCEPTION_EXPIRES: 2026-10-15
 
 jobs:
   validate:
@@ -97,7 +97,7 @@ jobs:
           platforms: ${{ matrix.platform }}
           load: true
           push: false
-          tags: zeebote/gemini-cli-docker-mcp:scan-${{ matrix.architecture }}
+          tags: ${{ vars.DOCKERHUB_REPOSITORY }}:scan-${{ matrix.architecture }}
           cache-from: type=gha,scope=scan-${{ matrix.architecture }}
           cache-to: type=gha,mode=max,scope=scan-${{ matrix.architecture }}
 
@@ -105,7 +105,7 @@ jobs:
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
           scan-type: image
-          image-ref: zeebote/gemini-cli-docker-mcp:scan-${{ matrix.architecture }}
+          image-ref: ${{ vars.DOCKERHUB_REPOSITORY }}:scan-${{ matrix.architecture }}
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           skip-files: usr/local/bin/docker-mcp
@@ -118,7 +118,7 @@ jobs:
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
           scan-type: image
-          image-ref: zeebote/gemini-cli-docker-mcp:scan-${{ matrix.architecture }}
+          image-ref: ${{ vars.DOCKERHUB_REPOSITORY }}:scan-${{ matrix.architecture }}
           scanners: vuln
           vuln-type: library
           severity: HIGH,CRITICAL

@@ -1,0 +1,69 @@
+name: Sync README to Docker Hub
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - README.md
+
+  # Allows an administrator to manually re-sync the README.
+  workflow_dispatch:
+
+# This workflow only reads the Git repository.
+# Docker Hub credentials are provided separately through GitHub Secrets.
+permissions:
+  contents: read
+
+# Prevent multiple README updates from running simultaneously.
+concurrency:
+  group: dockerhub-readme-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Sync README to Docker Hub
+    runs-on: ubuntu-latest
+
+    # Defense in depth: only allow this job to run from main.
+    if: github.ref == 'refs/heads/main'
+
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          # Only the current commit is required.
+          fetch-depth: 1
+
+      - name: Validate README
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -f README.md ]]; then
+            echo "::error::README.md does not exist"
+            exit 1
+          fi
+
+          # Docker Hub currently limits the repository overview to
+          # 25,000 bytes. Fail rather than silently publishing
+          # incomplete documentation.
+          size=$(wc -c < README.md)
+
+          if (( size > 25000 )); then
+            echo "::error::README.md is ${size} bytes."
+            echo "::error::Docker Hub repository overview is limited to 25,000 bytes."
+            exit 1
+          fi
+
+          echo "README.md validation passed (${size} bytes)."
+
+      - name: Sync README to Docker Hub
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ vars.DOCKERHUB_REPOSITORY }}
+          readme-filepath: ./README.md
