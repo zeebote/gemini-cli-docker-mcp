@@ -59,8 +59,15 @@ CONFLUENCE_URL=https://your-company.atlassian.net/wiki
 ```
 *Tip: If you do not use Jira or Confluence, you can leave those fields blank or remove them.*
 
-### Step 4: Run the Assistant!
-Just run the provided startup script:
+### Step 4: Download or Clone the Repository & Run the Assistant!
+If you haven't already, clone the repository or download the `run.sh` script from [https://github.com/zeebote/gemini-cli-docker-mcp.git](https://github.com/zeebote/gemini-cli-docker-mcp.git):
+
+```bash
+git clone https://github.com/zeebote/gemini-cli-docker-mcp.git
+cd gemini-cli-docker-mcp
+```
+
+Then, run the startup script:
 ```bash
 ./run.sh
 ```
